@@ -23,6 +23,7 @@ import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.formats.avro.generated.Colors;
 import org.apache.flink.formats.avro.generated.Fixed2;
+import org.apache.flink.formats.avro.generated.OptionalUser;
 import org.apache.flink.formats.avro.generated.User;
 import org.apache.flink.mock.Whitebox;
 
@@ -87,18 +88,23 @@ class AvroOutputFormatTest {
     @Test
     void testSerialization() throws Exception {
 
-        serializeAndDeserialize(null, null);
-        serializeAndDeserialize(null, User.SCHEMA$);
+        serializeAndDeserialize(null, null, User.class);
+        serializeAndDeserialize(null, User.SCHEMA$, User.class);
+        serializeAndDeserialize(null, null, OptionalUser.class);
+        serializeAndDeserialize(null, User.SCHEMA$, OptionalUser.class);
         for (final AvroOutputFormat.Codec codec : AvroOutputFormat.Codec.values()) {
-            serializeAndDeserialize(codec, null);
-            serializeAndDeserialize(codec, User.SCHEMA$);
+            serializeAndDeserialize(codec, null, User.class);
+            serializeAndDeserialize(codec, User.SCHEMA$, User.class);
+            serializeAndDeserialize(codec, null, OptionalUser.class);
+            serializeAndDeserialize(codec, User.SCHEMA$, OptionalUser.class);
         }
     }
 
-    private void serializeAndDeserialize(final AvroOutputFormat.Codec codec, final Schema schema)
+    private <T> void serializeAndDeserialize(
+            final AvroOutputFormat.Codec codec, final Schema schema, final Class<T> clazz)
             throws IOException, ClassNotFoundException {
         // given
-        final AvroOutputFormat<User> outputFormat = new AvroOutputFormat<>(User.class);
+        final AvroOutputFormat<T> outputFormat = new AvroOutputFormat<>(clazz);
         if (codec != null) {
             outputFormat.setCodec(codec);
         }
@@ -118,7 +124,7 @@ class AvroOutputFormatTest {
             Object o = ois.readObject();
             assertThat(o).isInstanceOf(AvroOutputFormat.class);
             @SuppressWarnings("unchecked")
-            final AvroOutputFormat<User> restored = (AvroOutputFormat<User>) o;
+            final AvroOutputFormat<T> restored = (AvroOutputFormat<T>) o;
             final AvroOutputFormat.Codec restoredCodec =
                     (AvroOutputFormat.Codec) Whitebox.getInternalState(restored, "codec");
             final Schema restoredSchema =
