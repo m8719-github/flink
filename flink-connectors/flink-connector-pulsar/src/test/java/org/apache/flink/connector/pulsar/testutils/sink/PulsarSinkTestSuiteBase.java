@@ -16,30 +16,22 @@
  * limitations under the License.
  */
 
-package org.apache.flink.docs.configuration;
+package org.apache.flink.connector.pulsar.testutils.sink;
 
-import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.connector.testframe.environment.TestEnvironment;
+import org.apache.flink.connector.testframe.external.sink.DataStreamSinkExternalContext;
+import org.apache.flink.connector.testframe.testsuites.SinkTestSuiteBase;
+import org.apache.flink.streaming.api.CheckpointingMode;
 
-/** Simple descriptor for the location of a class containing {@link ConfigOption ConfigOptions}. */
-class OptionsClassLocation {
-    private final String module;
-    private final String pckg;
+import org.junit.jupiter.api.Disabled;
 
-    OptionsClassLocation(String module, String pckg) {
-        this.module = module;
-        this.pckg = pckg;
-    }
-
-    public String getModule() {
-        return module;
-    }
-
-    public String getPackage() {
-        return pckg;
-    }
+/** Pulsar sink don't expose the monitor metrics now. We have to disable this test. */
+public abstract class PulsarSinkTestSuiteBase extends SinkTestSuiteBase<String> {
 
     @Override
-    public String toString() {
-        return module + "#" + pckg;
-    }
+    @Disabled("Enable this test after FLINK-26027 being merged.")
+    public void testMetrics(
+            TestEnvironment testEnv,
+            DataStreamSinkExternalContext<String> externalContext,
+            CheckpointingMode semantic) {}
 }
